@@ -20,6 +20,9 @@ import java.util.Optional;
 
 @Service
 @Slf4j
+/**
+ * Class under development
+ */
 public class AlphaVantageForeignExchangePullableImpl implements IForeignExchangePullable<JsonNode> {
 
     private final static String QUERY_URL = "https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency=%s&to_currency=%s&apikey=%s";
