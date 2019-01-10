@@ -1,6 +1,5 @@
 package com.tradesys.engine.stockmarket.config;
 
-import com.tradesys.engine.stockmarket.utils.ForeignExchangeRateInfo;
 import com.tradesys.engine.stockmarket.utils.KafkaErrorMsg;
 import lombok.AllArgsConstructor;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -10,7 +9,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
-import org.springframework.kafka.support.serializer.JsonSerializer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,7 +23,7 @@ public class KafkaProducerConfig {
     private final KafkaConfig kafkaConfig;
 
     @Bean
-    public ProducerFactory<String, ForeignExchangeRateInfo> producerFactory() {
+    public ProducerFactory<String, String> producerFactory() {
         Map<String, Object> configProps = defaultConfigPros();
         return new DefaultKafkaProducerFactory<>(configProps);
     }
@@ -37,7 +35,7 @@ public class KafkaProducerConfig {
     }
 
     @Bean
-    public KafkaTemplate<String, ForeignExchangeRateInfo> kafkaTemplate() {
+    public KafkaTemplate<String, String> kafkaTemplate() {
         return new KafkaTemplate<>(producerFactory());
     }
 
@@ -56,7 +54,7 @@ public class KafkaProducerConfig {
                 StringSerializer.class);
         configProps.put(
                 ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
-                JsonSerializer.class);
+                StringSerializer.class);
         return configProps;
     }
 }
