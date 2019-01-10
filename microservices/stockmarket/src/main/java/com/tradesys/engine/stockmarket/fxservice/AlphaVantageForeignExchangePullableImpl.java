@@ -66,9 +66,7 @@ public class AlphaVantageForeignExchangePullableImpl implements IForeignExchange
             BigDecimal exchangeRate = new BigDecimal(foreignExchangeRate.findValue("5. Exchange Rate").textValue());
             DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss");
             LocalDateTime localDateTime = LocalDateTime.parse(foreignExchangeRate.findValue("6. Last Refreshed").textValue(), dateTimeFormatter);
-            ZoneId zoneId = ZoneId.of(foreignExchangeRate.findValue("7. Time Zone").textValue());
-            ZonedDateTime zonedDateTime = ZonedDateTime.of(localDateTime, zoneId);
-            return Optional.of(new ForeignExchangeRateInfo(fromCurrency, toCurrency, exchangeRate, zonedDateTime));
+            return Optional.of(new ForeignExchangeRateInfo(fromCurrency, toCurrency, exchangeRate, localDateTime));
         } catch (Exception e) {
             log.error(e.getMessage());
             return Optional.empty();

@@ -5,9 +5,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -18,7 +17,7 @@ public class ForeignExchangeRateInfo {
     private Currency fromCurrency;
     private Currency toCurrency;
     private BigDecimal exchangeRate;
-    private ZonedDateTime zonedDateTime;
+    private LocalDateTime localDateTime;
 
     public ForeignExchangeRateInfo() {
 

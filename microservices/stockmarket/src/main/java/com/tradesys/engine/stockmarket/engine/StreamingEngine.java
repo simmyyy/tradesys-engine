@@ -47,7 +47,6 @@ public class StreamingEngine {
                                 e.getMessage(),
                                 LocalDateTime.now())))
                 .doOnComplete(() -> log.info("Finished fx flux successfully, time: " + LocalDateTime.now().toString()))
-
         ;
     }
 
