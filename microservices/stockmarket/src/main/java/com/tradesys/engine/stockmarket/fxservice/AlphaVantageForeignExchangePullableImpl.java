@@ -46,7 +46,10 @@ public class AlphaVantageForeignExchangePullableImpl implements IForeignExchange
             return Optional.of(mapper.readTree(response.getBody()));
         } catch (Exception e) {
             log.error(e.getMessage());
-            return Optional.empty();
+            throw new RuntimeException("Error while getting data for Foreign Exchange. " +
+                    "From currency: " + fromCurrency.toString() +
+                    ". To currency: " + toCurrency.toString() +
+                    ". API Key: " + apiKey);
         }
     }
 

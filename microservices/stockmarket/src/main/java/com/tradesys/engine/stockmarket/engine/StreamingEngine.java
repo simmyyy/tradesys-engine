@@ -3,11 +3,17 @@ package com.tradesys.engine.stockmarket.engine;
 import com.tradesys.engine.stockmarket.fxservice.ForeignExchangeDataProvider;
 import com.tradesys.engine.stockmarket.kafkaservice.KafkaExchangeRatePublisher;
 import com.tradesys.engine.stockmarket.utils.ForeignExchangeRateInfo;
+import com.tradesys.engine.stockmarket.utils.KafkaErrorMsg;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
+
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Objects;
 
 @Service
 @Slf4j
@@ -18,9 +24,7 @@ public class StreamingEngine {
 
     private final ForeignExchangeDataPullingEngine foreignExchangeDataPullingEngine;
     private final KafkaExchangeRatePublisher kafkaExchangeRatePublisher;
-
-    private boolean fluxData = Boolean.TRUE;
-    Flux<ForeignExchangeRateInfo> rates;
+    Flux<List<ForeignExchangeRateInfo>> rates;
 
 
     @Autowired
@@ -30,36 +34,28 @@ public class StreamingEngine {
         this.kafkaExchangeRatePublisher = kafkaExchangeRatePublisher;
     }
 
+    //should be parametrized
     public void getForeignExchangeFlux() {
         rates = Flux
-                .create(emitter -> {
-                    while (true) {
-                        foreignExchangeDataPullingEngine
-                                .pullForeignExchangeRateInfo(ForeignExchangeDataProvider.ALPHAVANTAGE)
-                                .forEach(emitter::next);
-                        try {
-                            Thread.sleep(20000);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                });
+                .interval(Duration.ofSeconds(30))
+                .map(tick -> foreignExchangeDataPullingEngine
+                        .pullForeignExchangeRateInfo(ForeignExchangeDataProvider.ALPHAVANTAGE)
+                )
+                .filter(Objects::nonNull)
+                .doOnError(e -> kafkaExchangeRatePublisher.
+                        sendErrorInfo(new KafkaErrorMsg(
+                                e.getMessage(),
+                                LocalDateTime.now())))
+                .doOnComplete(() -> log.info("Finished fx flux successfully, time: " + LocalDateTime.now().toString()))
+
+        ;
     }
 
     public void startFlux() {
-        rates.subscribe(kafkaExchangeRatePublisher::sendExchangeRate);
+        rates.subscribe(s -> s.forEach(kafkaExchangeRatePublisher::sendExchangeRate));
     }
 
     public void stopFlux() {
-        rates.cancelOn(Schedulers.single());
-        Schedulers.shutdownNow();
-    }
-
-    public boolean isFluxData() {
-        return fluxData;
-    }
-
-    public void setFluxData(boolean fluxData) {
-        this.fluxData = fluxData;
+        rates.cancelOn(Schedulers.immediate());
     }
 }
