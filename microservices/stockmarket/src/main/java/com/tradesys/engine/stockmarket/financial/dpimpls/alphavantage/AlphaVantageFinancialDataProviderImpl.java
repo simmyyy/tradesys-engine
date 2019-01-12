@@ -1,15 +1,20 @@
-package com.tradesys.engine.stockmarket.financial.pullableimpls;
+package com.tradesys.engine.stockmarket.financial.dpimpls.alphavantage;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tradesys.engine.stockmarket.financial.IFinancialDataPullable;
+import com.google.gson.Gson;
+import com.tradesys.engine.stockmarket.financial.pullable.IFinancialDataPullable;
 import com.tradesys.engine.stockmarket.financial.model.PullableMetadata;
+import com.tradesys.engine.stockmarket.financial.writable.IFinancialDataWritable;
+import com.tradesys.engine.stockmarket.utils.PullInfoDataLog;
 import com.tradesys.engine.stockmarket.utils.exceptions.MalformedPullUrlException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+
 import java.util.Optional;
 
 @Service
@@ -17,13 +22,15 @@ import java.util.Optional;
 /**
  * Class under development
  */
-public class AlphaVantageFinancialDataPullableImpl implements IFinancialDataPullable {
+public class AlphaVantageFinancialDataProviderImpl implements IFinancialDataPullable, IFinancialDataWritable {
 
     private final String apiKey;
+    private final KafkaTemplate<String, String> kafkaTemplate;
 
     @Autowired
-    public AlphaVantageFinancialDataPullableImpl(Environment environment) {
+    public AlphaVantageFinancialDataProviderImpl(Environment environment, KafkaTemplate<String, String> kafkaTemplate) {
         this.apiKey = environment.getProperty("alphavantage.api-key");
+        this.kafkaTemplate = kafkaTemplate;
     }
 
     @Override
@@ -52,5 +59,10 @@ public class AlphaVantageFinancialDataPullableImpl implements IFinancialDataPull
 
     private String getFullQueryUrl(String queryUrl) {
         return String.format(queryUrl, this.apiKey);
+    }
+
+    @Override
+    public void write(PullableMetadata metadata, PullInfoDataLog info) {
+        kafkaTemplate.send(metadata.getKafkaCollection(), new Gson().toJson(info));
     }
 }

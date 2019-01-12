@@ -1,4 +1,4 @@
-package com.tradesys.engine.stockmarket.financial;
+package com.tradesys.engine.stockmarket.financial.pullable;
 
 import com.tradesys.engine.stockmarket.financial.model.PullableMetadata;
 import com.tradesys.engine.stockmarket.utils.PullInfoDataLog;

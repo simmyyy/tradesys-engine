@@ -1,6 +1,7 @@
 package com.tradesys.engine.stockmarket.financial.model;
 
-import com.tradesys.engine.stockmarket.financial.DataProvider;
+import com.tradesys.engine.stockmarket.financial.pullable.DataProvider;
+import com.tradesys.engine.stockmarket.financial.writable.DownstreamSystem;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,5 +17,8 @@ public class PullableMetadata {
     private String apiURL;
     private String description;
     private String sample;
+    private String kafkaCollection;
+    private int kafkaPartition;
+    private DownstreamSystem downstreamSystem;
 
 }

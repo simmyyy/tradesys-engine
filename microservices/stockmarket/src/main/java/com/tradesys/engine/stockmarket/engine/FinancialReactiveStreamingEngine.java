@@ -1,10 +1,12 @@
 package com.tradesys.engine.stockmarket.engine;
 
 import com.tradesys.engine.stockmarket.engine.dto.ActiveProcessStatusDTO;
-import com.tradesys.engine.stockmarket.financial.DataProvidersFactory;
-import com.tradesys.engine.stockmarket.financial.IFinancialDataPullable;
+import com.tradesys.engine.stockmarket.financial.pullable.DataProvidersFactory;
+import com.tradesys.engine.stockmarket.financial.pullable.IFinancialDataPullable;
 import com.tradesys.engine.stockmarket.financial.model.PullableMetadata;
 import com.tradesys.engine.stockmarket.financial.service.MetadataService;
+import com.tradesys.engine.stockmarket.financial.writable.DataProviderWritableFactory;
+import com.tradesys.engine.stockmarket.financial.writable.IFinancialDataWritable;
 import com.tradesys.engine.stockmarket.kafkaservice.KafkaExchangeRatePublisher;
 import com.tradesys.engine.stockmarket.utils.exceptions.ProcessAlreadyDefinedException;
 import com.tradesys.engine.stockmarket.utils.exceptions.ProcessNotFoundException;
@@ -16,7 +18,6 @@ import reactor.core.publisher.Flux;
 
 import java.time.Duration;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -27,33 +28,31 @@ public class FinancialReactiveStreamingEngine {
 
 
     private final DataProvidersFactory dataProvidersFactory;
-    private final KafkaExchangeRatePublisher kafkaExchangeRatePublisher;
     private final MetadataService metadataService;
+    private final DataProviderWritableFactory dataProviderWritableFactory;
     private static List<ActiveProcess> activeProcesses = Collections.synchronizedList(new ArrayList<>());
 
 
     @Autowired
     public FinancialReactiveStreamingEngine(DataProvidersFactory dataProvidersFactory,
-                                            KafkaExchangeRatePublisher kafkaExchangeRatePublisher,
+                                            DataProviderWritableFactory dataProviderWritableFactory,
                                             MetadataService metadataService) {
         this.dataProvidersFactory = dataProvidersFactory;
-        this.kafkaExchangeRatePublisher = kafkaExchangeRatePublisher;
+        this.dataProviderWritableFactory = dataProviderWritableFactory;
         this.metadataService = metadataService;
     }
 
 
     public ActiveProcessStatusDTO startStreaming(Long processId, List<String> apiUrls) {
         PullableMetadata metadata = metadataService.getPullableMetadataById(processId);
+        IFinancialDataPullable dataProviderPullableImpl = dataProvidersFactory.getFinancialDataPullableImpl(metadata.getDataProvider());
+        IFinancialDataWritable dataProviderWritableImpl = dataProviderWritableFactory.getDataProviderWritableImpl(metadata.getDataProvider(), metadata.getDownstreamSystem());
         Disposable ref = createFluxProcess(metadata)
-                .map(tick -> {
-                    IFinancialDataPullable pullable = dataProvidersFactory.getFinancialDataPullableImpl(metadata.getDataProvider());
-                    return apiUrls.parallelStream()
-                            .map(s -> pullable.pull(metadata, s))
-                            .map(obj -> pullable.toPullInfoDataLog(metadata.getProcessId(), obj));
-//                            .collect(Collectors.toList());
-                })
+                .map(tick -> apiUrls.parallelStream()
+                        .map(s -> dataProviderPullableImpl.pull(metadata, s))
+                        .map(obj -> dataProviderPullableImpl.toPullInfoDataLog(metadata.getProcessId(), obj)))
                 .filter(Objects::nonNull)
-                .subscribe(s -> s.forEach(kafkaExchangeRatePublisher::sendExchangeRate));
+                .subscribe(s -> s.forEach(data -> dataProviderWritableImpl.write(metadata, data)));
         ActiveProcess activeProcess = findActiveProcessById(processId);
         activeProcess.setStatus(ProcessStatus.ONGOING);
         activeProcess.setFluxReference(ref);

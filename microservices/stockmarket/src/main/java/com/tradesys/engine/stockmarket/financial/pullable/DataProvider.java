@@ -1,4 +1,4 @@
-package com.tradesys.engine.stockmarket.financial;
+package com.tradesys.engine.stockmarket.financial.pullable;
 
 import lombok.Getter;
 

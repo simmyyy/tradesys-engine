@@ -4,7 +4,7 @@ package com.tradesys.engine.stockmarket.engine.api;
 import com.tradesys.engine.stockmarket.engine.FinancialReactiveStreamingEngine;
 import com.tradesys.engine.stockmarket.engine.dto.ActiveProcessStatusDTO;
 import com.tradesys.engine.stockmarket.engine.dto.StreamingApiParamsDTO;
-import com.tradesys.engine.stockmarket.financial.pullableimpls.iextrading.IEXTradingServiceUtils;
+import com.tradesys.engine.stockmarket.financial.dpimpls.iextrading.IEXTradingServiceUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

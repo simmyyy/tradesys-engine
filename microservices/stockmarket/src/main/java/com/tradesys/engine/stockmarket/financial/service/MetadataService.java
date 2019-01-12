@@ -1,7 +1,7 @@
 package com.tradesys.engine.stockmarket.financial.service;
 
 
-import com.tradesys.engine.stockmarket.financial.DataProvider;
+import com.tradesys.engine.stockmarket.financial.pullable.DataProvider;
 import com.tradesys.engine.stockmarket.financial.model.PullableMetadata;
 import com.tradesys.engine.stockmarket.financial.repository.PullableMetadataRepository;
 import lombok.AllArgsConstructor;

@@ -1,12 +1,17 @@
-package com.tradesys.engine.stockmarket.financial.pullableimpls.iextrading;
+package com.tradesys.engine.stockmarket.financial.dpimpls.iextrading;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tradesys.engine.stockmarket.financial.IFinancialDataPullable;
+import com.google.gson.Gson;
+import com.tradesys.engine.stockmarket.financial.pullable.IFinancialDataPullable;
 import com.tradesys.engine.stockmarket.financial.model.PullableMetadata;
+import com.tradesys.engine.stockmarket.financial.writable.IFinancialDataWritable;
+import com.tradesys.engine.stockmarket.utils.PullInfoDataLog;
 import com.tradesys.engine.stockmarket.utils.exceptions.MalformedPullUrlException;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -14,7 +19,10 @@ import java.util.Optional;
 
 @Service
 @Slf4j
-public class IEXTradingFinancialDataPullableImpl implements IFinancialDataPullable {
+@AllArgsConstructor
+public class IEXTradingFinancialDataProviderImpl implements IFinancialDataPullable, IFinancialDataWritable {
+
+    KafkaTemplate<String, String> kafkaTemplate;
 
     @Override
     public void validateUrl(String url) throws MalformedPullUrlException {
@@ -37,5 +45,10 @@ public class IEXTradingFinancialDataPullableImpl implements IFinancialDataPullab
             throw new RuntimeException("Error while getting data from IEXTrading. " +
                     "API URL: " + url);
         }
+    }
+
+    @Override
+    public void write(PullableMetadata metadata, PullInfoDataLog info) {
+        kafkaTemplate.send(metadata.getKafkaCollection(), new Gson().toJson(info));
     }
 }

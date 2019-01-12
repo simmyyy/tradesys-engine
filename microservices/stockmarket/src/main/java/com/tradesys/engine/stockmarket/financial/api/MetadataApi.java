@@ -1,8 +1,8 @@
 package com.tradesys.engine.stockmarket.financial.api;
 
-import com.tradesys.engine.stockmarket.financial.DataProvider;
+import com.tradesys.engine.stockmarket.financial.pullable.DataProvider;
 import com.tradesys.engine.stockmarket.financial.model.PullableMetadata;
-import com.tradesys.engine.stockmarket.financial.pullableimpls.iextrading.IEXTradingServiceUtils;
+import com.tradesys.engine.stockmarket.financial.dpimpls.iextrading.IEXTradingServiceUtils;
 import com.tradesys.engine.stockmarket.financial.service.MetadataService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;

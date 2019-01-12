@@ -1,7 +1,7 @@
-package com.tradesys.engine.stockmarket.financial;
+package com.tradesys.engine.stockmarket.financial.pullable;
 
-import com.tradesys.engine.stockmarket.financial.pullableimpls.AlphaVantageFinancialDataPullableImpl;
-import com.tradesys.engine.stockmarket.financial.pullableimpls.iextrading.IEXTradingFinancialDataPullableImpl;
+import com.tradesys.engine.stockmarket.financial.dpimpls.alphavantage.AlphaVantageFinancialDataProviderImpl;
+import com.tradesys.engine.stockmarket.financial.dpimpls.iextrading.IEXTradingFinancialDataProviderImpl;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component;
 @AllArgsConstructor
 public class DataProvidersFactory {
 
-    AlphaVantageFinancialDataPullableImpl alphaVantageForeignExchangePullable;
-    IEXTradingFinancialDataPullableImpl iexTradingFinancialDataPullable;
+    AlphaVantageFinancialDataProviderImpl alphaVantageForeignExchangePullable;
+    IEXTradingFinancialDataProviderImpl iexTradingFinancialDataPullable;
 
     public IFinancialDataPullable getFinancialDataPullableImpl(DataProvider dataProvider) {
         if (dataProvider.equals(DataProvider.ALPHAVANTAGE)) {
