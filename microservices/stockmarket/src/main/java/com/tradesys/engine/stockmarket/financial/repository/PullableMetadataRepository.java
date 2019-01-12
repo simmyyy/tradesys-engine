@@ -3,7 +3,6 @@ package com.tradesys.engine.stockmarket.financial.repository;
 
 import com.tradesys.engine.stockmarket.financial.DataProvider;
 import com.tradesys.engine.stockmarket.financial.model.PullableMetadata;
-import com.tradesys.engine.stockmarket.utils.exceptions.ProcessNotFoundException;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -19,7 +18,7 @@ public class PullableMetadataRepository {
 
     static {
         pullableMetadataList.add(new PullableMetadata(1L, DataProvider.ALPHAVANTAGE, 30000L, "https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency=%s&to_currency=%s&apikey=%s", "sample description", "sample "));
-        pullableMetadataList.add(new PullableMetadata(2L, DataProvider.IEXTrading, 30000L, "https://api.iextrading.com/1.0/ref-data/symbols", "sample description", "sample "));
+        pullableMetadataList.add(new PullableMetadata(2L, DataProvider.IEXTrading, 30000L, "https://api.iextrading.com/1.0/ref-data/symbols", "IEXTrading-Symbols", "sample "));
         pullableMetadataList.add(new PullableMetadata(3L, DataProvider.IEXTrading, 30000L, "https://api.iextrading.com/1.0/stock/{symbol}/company", "sample description", "sample "));
     }
 

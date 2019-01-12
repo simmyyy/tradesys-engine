@@ -55,6 +55,10 @@ public class KafkaProducerConfig {
         configProps.put(
                 ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
                 StringSerializer.class);
+        configProps.put(ProducerConfig.MAX_REQUEST_SIZE_CONFIG, "41943040");
+        configProps.put("message.max.bytes", "41943040");
+        configProps.put("replica.fetch.max.bytes", "41943040");
+        configProps.put("fetch.message.max.bytes", "41943040");
         return configProps;
     }
 }

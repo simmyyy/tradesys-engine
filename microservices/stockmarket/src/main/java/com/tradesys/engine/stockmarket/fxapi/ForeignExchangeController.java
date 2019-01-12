@@ -40,15 +40,4 @@ public class ForeignExchangeController {
     }
 
 
-
-    @GetMapping("/start-flux")
-    public void whatever() {
-        financialReactiveStreamingEngine.startFlux();
-    }
-
-    @GetMapping("/stop-flux")
-    public void whatever2() {
-        financialReactiveStreamingEngine.stopFlux();
-    }
-
 }

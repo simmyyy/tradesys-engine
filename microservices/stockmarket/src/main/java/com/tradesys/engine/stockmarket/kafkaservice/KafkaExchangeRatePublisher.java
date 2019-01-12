@@ -14,15 +14,10 @@ import org.springframework.stereotype.Service;
  */
 public class KafkaExchangeRatePublisher {
 
-    KafkaTemplate<String, String> foreignExchangeRateInfoKafkaTemplate;
-    KafkaTemplate<String, KafkaErrorMsg> errorMsgKafkaTemplate;
+    KafkaTemplate<String, String> kafkaTemplate;
 
     public void sendExchangeRate(PullInfoDataLog info) {
-        foreignExchangeRateInfoKafkaTemplate.send("fxrate", new Gson().toJson(info));
-    }
-
-    public void sendErrorInfo(KafkaErrorMsg msg) {
-        errorMsgKafkaTemplate.send("streaming-errors", msg);
+        kafkaTemplate.send("fxrate", new Gson().toJson(info));
     }
 
 }

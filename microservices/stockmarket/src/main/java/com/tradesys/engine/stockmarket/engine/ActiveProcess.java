@@ -12,7 +12,7 @@ import reactor.core.publisher.Flux;
 public class ActiveProcess {
 
     private Long processId;
-    private Flux<?> fluxReference;
+    private Object fluxReference;
     private PullableMetadata metadata;
     private ProcessStatus status;
 

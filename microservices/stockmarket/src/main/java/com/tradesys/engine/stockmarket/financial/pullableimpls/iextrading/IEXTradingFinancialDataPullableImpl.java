@@ -1,34 +1,24 @@
-package com.tradesys.engine.stockmarket.financial.pullableimpls;
+package com.tradesys.engine.stockmarket.financial.pullableimpls.iextrading;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tradesys.engine.stockmarket.financial.IFinancialDataPullable;
 import com.tradesys.engine.stockmarket.financial.model.PullableMetadata;
 import com.tradesys.engine.stockmarket.utils.exceptions.MalformedPullUrlException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+
 import java.util.Optional;
 
 @Service
 @Slf4j
-/**
- * Class under development
- */
-public class AlphaVantageFinancialDataPullableImpl implements IFinancialDataPullable {
-
-    private final String apiKey;
-
-    @Autowired
-    public AlphaVantageFinancialDataPullableImpl(Environment environment) {
-        this.apiKey = environment.getProperty("alphavantage.api-key");
-    }
+public class IEXTradingFinancialDataPullableImpl implements IFinancialDataPullable {
 
     @Override
     public void validateUrl(String url) throws MalformedPullUrlException {
-        if (!url.startsWith("https://www.alphavantage.co/query?function")) {
+        if (!url.startsWith("https://api.iextrading.com/1.0")) {
             throw new MalformedPullUrlException("Can't execute provided url. Either malformed or insecure.");
         }
     }
@@ -37,20 +27,15 @@ public class AlphaVantageFinancialDataPullableImpl implements IFinancialDataPull
     public Optional<Object> pull(PullableMetadata metadata, String url) {
         ObjectMapper mapper = new ObjectMapper();
         log.debug("Process ID: " + metadata.getProcessId());
-        log.debug("API_KEY: " + apiKey);
         try {
-            String fullQueryUrl = getFullQueryUrl(url);
             RestTemplate restTemplate = new RestTemplate();
-            ResponseEntity<String> response = restTemplate.getForEntity(fullQueryUrl, String.class);
-            return Optional.of(mapper.readTree(response.getBody()));
+            ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+            JsonNode responseBody = mapper.readTree(response.getBody());
+            return Optional.of(responseBody);
         } catch (Exception e) {
             log.error(e.getMessage());
-            throw new RuntimeException("Error while getting data for Foreign Exchange. " +
+            throw new RuntimeException("Error while getting data from IEXTrading. " +
                     "API URL: " + url);
         }
-    }
-
-    private String getFullQueryUrl(String queryUrl) {
-        return String.format(queryUrl, this.apiKey);
     }
 }
