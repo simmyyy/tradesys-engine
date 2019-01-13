@@ -5,7 +5,7 @@ import lombok.Getter;
 @Getter
 public enum DataProvider {
 
-    ALPHAVANTAGE(10), IEXTrading(9);
+    ALPHAVANTAGE(100), IEXTrading(60), COINApi(80);
 
     private int priority;
 

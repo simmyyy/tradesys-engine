@@ -35,7 +35,7 @@ public class PullableMetadataRepository {
         pullableMetadataList.add(new PullableMetadata(14L, DataProvider.IEXTrading, 30000L, "https://api.iextrading.com/1.0/market", "sample description", "sample ", "market", 1, DownstreamSystem.KAFKA));
         pullableMetadataList.add(new PullableMetadata(15L, DataProvider.IEXTrading, 30000L, "https://api.iextrading.com/1.0/stock/{symbol}/quote", "sample description", "sample ", "quote", 1, DownstreamSystem.KAFKA));
         pullableMetadataList.add(new PullableMetadata(16L, DataProvider.IEXTrading, 30000L, "https://api.iextrading.com/1.0/stock/market/crypto", "sample description", "sample ", "crypto", 1, DownstreamSystem.KAFKA));
-
+        pullableMetadataList.add(new PullableMetadata(17L, DataProvider.COINApi, 61000L, "https://rest.coinapi.io/v1/exchangerate/%s", "sample description", "sample ", "fxrate", 1, DownstreamSystem.KAFKA));
     }
 
     public List<PullableMetadata> getAllByProvider(DataProvider dataProvider) {
