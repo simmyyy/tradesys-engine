@@ -4,6 +4,7 @@ package com.tradesys.engine.stockmarket.financial.repository;
 import com.tradesys.engine.stockmarket.financial.pullable.DataProvider;
 import com.tradesys.engine.stockmarket.financial.model.PullableMetadata;
 import com.tradesys.engine.stockmarket.financial.writable.DownstreamSystem;
+import com.tradesys.engine.stockmarket.utils.exceptions.ProcessNotFoundException;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -27,6 +28,14 @@ public class PullableMetadataRepository {
         pullableMetadataList.add(new PullableMetadata(7L, DataProvider.IEXTrading, 30000L, "https://api.iextrading.com/1.0/stock/{symbol}/earnings", "sample description", "sample ", "earnings", 1, DownstreamSystem.KAFKA));
         pullableMetadataList.add(new PullableMetadata(8L, DataProvider.IEXTrading, 30000L, "https://api.iextrading.com/1.0/stock/market/today-earnings", "sample description", "sample ", "earnings", 1, DownstreamSystem.KAFKA));
         pullableMetadataList.add(new PullableMetadata(9L, DataProvider.IEXTrading, 30000L, "https://api.iextrading.com/1.0/stock/{symbol}/financials", "sample description", "sample ", "financial", 1, DownstreamSystem.KAFKA));
+        pullableMetadataList.add(new PullableMetadata(10L, DataProvider.IEXTrading, 30000L, "https://api.iextrading.com/1.0/stock/market/sector-performance", "sample description", "sample ", "sector-performance", 1, DownstreamSystem.KAFKA));
+        pullableMetadataList.add(new PullableMetadata(11L, DataProvider.IEXTrading, 30000L, "https://api.iextrading.com/1.0/stock/{symbol}/news/last/5", "sample description", "sample ", "news", 1, DownstreamSystem.KAFKA));
+        pullableMetadataList.add(new PullableMetadata(12L, DataProvider.IEXTrading, 30000L, "https://api.iextrading.com/1.0/stock/{symbol}/dividends/5y", "sample description", "sample ", "dividends", 1, DownstreamSystem.KAFKA));
+        pullableMetadataList.add(new PullableMetadata(13L, DataProvider.IEXTrading, 30000L, "https://api.iextrading.com/1.0/stock/{symbol}/price", "sample description", "sample ", "stock_price", 1, DownstreamSystem.KAFKA));
+        pullableMetadataList.add(new PullableMetadata(14L, DataProvider.IEXTrading, 30000L, "https://api.iextrading.com/1.0/market", "sample description", "sample ", "market", 1, DownstreamSystem.KAFKA));
+        pullableMetadataList.add(new PullableMetadata(15L, DataProvider.IEXTrading, 30000L, "https://api.iextrading.com/1.0/stock/{symbol}/quote", "sample description", "sample ", "quote", 1, DownstreamSystem.KAFKA));
+        pullableMetadataList.add(new PullableMetadata(16L, DataProvider.IEXTrading, 30000L, "https://api.iextrading.com/1.0/stock/market/crypto", "sample description", "sample ", "crypto", 1, DownstreamSystem.KAFKA));
+
     }
 
     public List<PullableMetadata> getAllByProvider(DataProvider dataProvider) {
@@ -34,7 +43,7 @@ public class PullableMetadataRepository {
     }
 
     public PullableMetadata getByProcessId(Long id) {
-        return pullableMetadataList.stream().filter(s -> s.getProcessId().equals(id)).findFirst().get();
+        return pullableMetadataList.stream().filter(s -> s.getProcessId().equals(id)).findFirst().orElseThrow(() -> new ProcessNotFoundException("Can't find process with id: " + id));
     }
 
 }

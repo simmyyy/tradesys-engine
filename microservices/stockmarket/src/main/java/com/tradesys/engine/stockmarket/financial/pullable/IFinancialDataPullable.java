@@ -13,8 +13,8 @@ public interface IFinancialDataPullable {
 
     Optional<Object> pull(PullableMetadata pullableMetadata, String url);
 
-    default PullInfoDataLog toPullInfoDataLog(Long processid, Object data) {
-        return new PullInfoDataLog(processid, LocalDateTime.now(), data);
+    default PullInfoDataLog toPullInfoDataLog(PullableMetadata metadata, String executedUrl, Object data) {
+        return new PullInfoDataLog(metadata.getDataProvider(), metadata.getProcessId(), executedUrl, LocalDateTime.now(), data);
     }
 
 }

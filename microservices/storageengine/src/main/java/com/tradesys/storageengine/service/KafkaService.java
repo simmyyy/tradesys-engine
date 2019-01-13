@@ -10,18 +10,20 @@ import org.springframework.stereotype.Service;
 @Service
 @AllArgsConstructor
 @Slf4j
-public class ForeignExchangeRateInfoService {
+public class KafkaService {
 
     private final MongoTemplate mongoTemplate;
 
-    public void save(String fxRateInfoJson) {
+    public void save(String logDataInfo) {
         try {
             mongoTemplate.createCollection("fxrate");
         } catch (Exception e) {
             log.error(e.getMessage());
         }
-        mongoTemplate.insert((DBObject) JSON.parse(fxRateInfoJson), "fxrate");
+        mongoTemplate.insert((DBObject) JSON.parse(logDataInfo), "fxrate");
     }
+
+
 
 
 }

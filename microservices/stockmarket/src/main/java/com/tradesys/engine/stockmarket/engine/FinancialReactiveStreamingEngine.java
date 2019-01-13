@@ -7,7 +7,6 @@ import com.tradesys.engine.stockmarket.financial.model.PullableMetadata;
 import com.tradesys.engine.stockmarket.financial.service.MetadataService;
 import com.tradesys.engine.stockmarket.financial.writable.DataProviderWritableFactory;
 import com.tradesys.engine.stockmarket.financial.writable.IFinancialDataWritable;
-import com.tradesys.engine.stockmarket.kafkaservice.KafkaExchangeRatePublisher;
 import com.tradesys.engine.stockmarket.utils.exceptions.ProcessAlreadyDefinedException;
 import com.tradesys.engine.stockmarket.utils.exceptions.ProcessNotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -26,12 +25,10 @@ import java.util.*;
  */
 public class FinancialReactiveStreamingEngine {
 
-
     private final DataProvidersFactory dataProvidersFactory;
     private final MetadataService metadataService;
     private final DataProviderWritableFactory dataProviderWritableFactory;
     private static List<ActiveProcess> activeProcesses = Collections.synchronizedList(new ArrayList<>());
-
 
     @Autowired
     public FinancialReactiveStreamingEngine(DataProvidersFactory dataProvidersFactory,
@@ -43,15 +40,20 @@ public class FinancialReactiveStreamingEngine {
     }
 
 
-    public ActiveProcessStatusDTO startStreaming(Long processId, List<String> apiUrls) {
-        PullableMetadata metadata = metadataService.getPullableMetadataById(processId);
-        IFinancialDataPullable dataProviderPullableImpl = dataProvidersFactory.getFinancialDataPullableImpl(metadata.getDataProvider());
-        IFinancialDataWritable dataProviderWritableImpl = dataProviderWritableFactory.getDataProviderWritableImpl(metadata.getDataProvider(), metadata.getDownstreamSystem());
+    public ActiveProcessStatusDTO startStreaming(final Long processId, final List<String> apiUrls) {
+        final PullableMetadata metadata = metadataService.getPullableMetadataById(processId);
+        final IFinancialDataPullable dataProviderPullableImpl = dataProvidersFactory.getFinancialDataPullableImpl(metadata.getDataProvider());
+        final IFinancialDataWritable dataProviderWritableImpl = dataProviderWritableFactory.getDataProviderWritableImpl(metadata.getDataProvider(), metadata.getDownstreamSystem());
         Disposable ref = createFluxProcess(metadata)
                 .map(tick -> apiUrls.parallelStream()
-                        .map(s -> dataProviderPullableImpl.pull(metadata, s))
-                        .map(obj -> dataProviderPullableImpl.toPullInfoDataLog(metadata.getProcessId(), obj)))
+                        .map(s -> {
+                            Object data = dataProviderPullableImpl
+                                    .pull(metadata, s)
+                                    .orElseThrow(() -> new RuntimeException("No data found for execution of URL: " + s));
+                            return dataProviderPullableImpl.toPullInfoDataLog(metadata, s, data);
+                        }))
                 .filter(Objects::nonNull)
+                //.doOnComplete(()->process.doOnCompleteAction())
                 .subscribe(s -> s.forEach(data -> dataProviderWritableImpl.write(metadata, data)));
         ActiveProcess activeProcess = findActiveProcessById(processId);
         activeProcess.setStatus(ProcessStatus.ONGOING);
@@ -60,9 +62,17 @@ public class FinancialReactiveStreamingEngine {
     }
 
     private Flux<?> createFluxProcess(PullableMetadata pullableMetadata) {
-        Optional<ActiveProcess> activeProcess = activeProcesses.stream().filter(s -> s.getProcessId().equals(pullableMetadata.getProcessId())).findFirst();
+        //@TODO replace with findActiveProcess??
+        Optional<ActiveProcess> activeProcess = activeProcesses
+                .stream()
+                .filter(s -> s.getProcessId().equals(pullableMetadata.getProcessId()))
+                .findFirst();
         if (!activeProcess.isPresent()) {
-            ActiveProcess processStatus = new ActiveProcess(pullableMetadata.getProcessId(), Flux.interval(Duration.ofMillis(pullableMetadata.getIntervalInMills())), pullableMetadata, ProcessStatus.STARTED);
+            ActiveProcess processStatus = new ActiveProcess(
+                    pullableMetadata.getProcessId(),
+                    Flux.interval(Duration.ofMillis(pullableMetadata.getIntervalInMills())),
+                    pullableMetadata,
+                    ProcessStatus.STARTED);
             activeProcesses.add(processStatus);
             return (Flux<?>) processStatus.getFluxReference();
         } else {
@@ -91,7 +101,10 @@ public class FinancialReactiveStreamingEngine {
     }
 
     public ActiveProcess findActiveProcessById(Long id) {
-        Optional<ActiveProcess> activeProcess = activeProcesses.stream().filter(s -> s.getProcessId().equals(id)).findFirst();
+        Optional<ActiveProcess> activeProcess = activeProcesses
+                .stream()
+                .filter(s -> s.getProcessId().equals(id))
+                .findFirst();
         if (activeProcess.isPresent()) {
             return activeProcess.get();
         } else {
