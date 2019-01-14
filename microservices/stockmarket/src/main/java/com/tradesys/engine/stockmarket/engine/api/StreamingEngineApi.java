@@ -1,7 +1,7 @@
 package com.tradesys.engine.stockmarket.engine.api;
 
 
-import com.tradesys.engine.stockmarket.engine.FinancialReactiveStreamingEngine;
+import com.tradesys.engine.stockmarket.engine.processor.*;
 import com.tradesys.engine.stockmarket.engine.dto.ActiveProcessStatusDTO;
 import com.tradesys.engine.stockmarket.engine.dto.StreamingApiParamsDTO;
 import com.tradesys.engine.stockmarket.financial.dpimpls.iextrading.IEXTradingServiceUtils;
@@ -19,38 +19,44 @@ import java.util.List;
 @Slf4j
 public class StreamingEngineApi {
 
-    private final FinancialReactiveStreamingEngine financialReactiveStreamingEngine;
     private final IEXTradingServiceUtils iexTradingServiceUtils;
+    private final ProcessorFactory processorFactory;
 
     @PostMapping("/processes")
     public ResponseEntity<?> startProcess(@RequestBody StreamingApiParamsDTO params) {
-        ActiveProcessStatusDTO status = financialReactiveStreamingEngine.startStreaming(params.getProcessId(), params.getUrls());
+        ActiveProcessStatusDTO status = processorFactory.getProcessor(ProcessorType.FINANCIAL_REACTIVE).startProcess(params.getProcessId(), params.getUrls());
         return new ResponseEntity<>(status, HttpStatus.CREATED);
     }
 
     @DeleteMapping("/processes")
     public ResponseEntity<?> stopProcess(@RequestParam long processId) {
-        ActiveProcessStatusDTO status = financialReactiveStreamingEngine.finishStreaming(processId);
+        ActiveProcessStatusDTO status = processorFactory.getProcessor(ProcessorType.FINANCIAL_REACTIVE).finishProcess(processId);
         return new ResponseEntity<>(status, HttpStatus.OK);
+    }
+
+    @PostMapping("alpha-processes/all-symbols")
+    public ResponseEntity<?> startAlphantageProcesses(@RequestBody StreamingApiParamsDTO params) {
+        List<String> rewrittenUrls = iexTradingServiceUtils.withAllSymbols(params.getUrls().get(0));
+        ActiveProcessStatusDTO status = processorFactory.getProcessor(ProcessorType.FINANCIAL_PROGRESSIVE_REACTIVE).startProcess(params.getProcessId(), rewrittenUrls);
+        return new ResponseEntity<>(status, HttpStatus.CREATED);
     }
 
     @PostMapping("/iex-processes/all-symbols")
     public ResponseEntity<?> startIEXProcesses(@RequestBody StreamingApiParamsDTO params) {
         List<String> rewrittenUrls = iexTradingServiceUtils.withAllSymbols(params.getUrls().get(0));
-//        log.info(rewrittenUrls.toString());
-        ActiveProcessStatusDTO status = financialReactiveStreamingEngine.startStreaming(params.getProcessId(), rewrittenUrls);
+        ActiveProcessStatusDTO status = processorFactory.getProcessor(ProcessorType.FINANCIAL_REACTIVE).startProcess(params.getProcessId(), rewrittenUrls);
         return new ResponseEntity<>(status, HttpStatus.CREATED);
     }
 
     @GetMapping("/processes/{processesId}")
     public ResponseEntity<?> getProcessStatus(@PathVariable("processesId") Long processId) {
-        ActiveProcessStatusDTO status = new ActiveProcessStatusDTO(financialReactiveStreamingEngine.findActiveProcessById(processId));
+        ActiveProcessStatusDTO status = new ActiveProcessStatusDTO(processorFactory.getProcessor(ProcessorType.FINANCIAL_REACTIVE).findActiveProcessById(processId));
         return new ResponseEntity<>(status, HttpStatus.FOUND);
     }
 
     @GetMapping("/processes")
     public ResponseEntity<?> getActiveProcesses() {
-        return new ResponseEntity<>(financialReactiveStreamingEngine.getActiveProcesses(), HttpStatus.OK);
+        return new ResponseEntity<>(processorFactory.getProcessor(ProcessorType.FINANCIAL_REACTIVE).getActiveProcesses(), HttpStatus.OK);
     }
 
 }

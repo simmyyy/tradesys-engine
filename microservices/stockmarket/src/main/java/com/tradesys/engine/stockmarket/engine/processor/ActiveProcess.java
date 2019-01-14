@@ -1,10 +1,9 @@
-package com.tradesys.engine.stockmarket.engine;
+package com.tradesys.engine.stockmarket.engine.processor;
 
 import com.tradesys.engine.stockmarket.financial.model.PullableMetadata;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import reactor.core.publisher.Flux;
 
 @Getter
 @Setter

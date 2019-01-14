@@ -50,5 +50,6 @@ public class IEXTradingFinancialDataProviderImpl implements IFinancialDataPullab
     @Override
     public void write(PullableMetadata metadata, PullInfoDataLog info) {
         kafkaTemplate.send(metadata.getKafkaCollection(), new Gson().toJson(info));
+//        kafkaTemplate.send(metadata.getKafkaCollection(), new Gson().toJson(info));
     }
 }

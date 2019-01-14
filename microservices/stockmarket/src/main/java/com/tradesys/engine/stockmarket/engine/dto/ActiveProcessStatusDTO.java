@@ -1,7 +1,7 @@
 package com.tradesys.engine.stockmarket.engine.dto;
 
-import com.tradesys.engine.stockmarket.engine.ActiveProcess;
-import com.tradesys.engine.stockmarket.engine.ProcessStatus;
+import com.tradesys.engine.stockmarket.engine.processor.ActiveProcess;
+import com.tradesys.engine.stockmarket.engine.processor.ProcessStatus;
 import lombok.Getter;
 import lombok.Setter;
 
