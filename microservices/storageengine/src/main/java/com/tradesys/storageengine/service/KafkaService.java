@@ -14,16 +14,14 @@ public class KafkaService {
 
     private final MongoTemplate mongoTemplate;
 
-    public void save(String logDataInfo) {
+    public void save(String collectionName, String logDataInfo) {
         try {
-            mongoTemplate.createCollection("fxrate");
+            mongoTemplate.createCollection(collectionName);
         } catch (Exception e) {
             log.error(e.getMessage());
         }
-        mongoTemplate.insert((DBObject) JSON.parse(logDataInfo), "fxrate");
+        mongoTemplate.insert((DBObject) JSON.parse(logDataInfo), collectionName);
     }
-
-
 
 
 }

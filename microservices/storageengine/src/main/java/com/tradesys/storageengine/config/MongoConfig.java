@@ -1,40 +1,27 @@
 package com.tradesys.storageengine.config;
 
-import com.mongodb.MongoClient;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
-import org.springframework.data.mongodb.config.AbstractMongoConfiguration;
-import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.MongoDbFactory;
+import org.springframework.data.mongodb.core.convert.DbRefResolver;
+import org.springframework.data.mongodb.core.convert.DefaultDbRefResolver;
+import org.springframework.data.mongodb.core.convert.MappingMongoConverter;
+import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 
 @Configuration
 @AllArgsConstructor
-public class MongoConfig extends AbstractMongoConfiguration {
+public class MongoConfig {
 
-
-    Environment environment;
-
-    public String mongoDBHost() {
-        return environment.getProperty("spring.data.mongodb.host");
-    }
-
-    public String mongoDBPort() {
-        return environment.getProperty("spring.data.mongodb.port");
-    }
-
-    @Override
-    public MongoClient mongoClient() {
-        return new MongoClient(mongoDBHost(), Integer.valueOf(mongoDBPort()));
-    }
-
-    @Override
-    protected String getDatabaseName() {
-        return environment.getProperty("spring.data.mongodb.database");
-    }
+    private final MongoDbFactory mongoFactory;
+    private final MongoMappingContext mongoMappingContext;
 
     @Bean
-    public MongoTemplate mongoTemplate() throws Exception {
-        return new MongoTemplate(mongoClient(), getDatabaseName());
+    public MappingMongoConverter mongoConverter() {
+        DbRefResolver dbRefResolver = new DefaultDbRefResolver(mongoFactory);
+        MappingMongoConverter mongoConverter = new MappingMongoConverter(dbRefResolver, mongoMappingContext);
+        mongoConverter.setMapKeyDotReplacement("__");
+        mongoConverter.afterPropertiesSet();
+        return mongoConverter;
     }
 }

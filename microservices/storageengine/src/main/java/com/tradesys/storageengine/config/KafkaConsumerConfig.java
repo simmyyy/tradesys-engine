@@ -42,13 +42,15 @@ public class KafkaConsumerConfig {
                 JsonDeserializer.TRUSTED_PACKAGES,
                 "*"
         );
+        props.put("message.max.bytes", "41943040");
+        props.put("replica.fetch.max.bytes", "41943040");
+        props.put("fetch.message.max.bytes", "41943040");
         return new DefaultKafkaConsumerFactory<>(props);
     }
 
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, String>
     kafkaListenerContainerFactory() {
-
         ConcurrentKafkaListenerContainerFactory<String, String> factory
                 = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
