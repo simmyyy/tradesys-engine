@@ -4,6 +4,7 @@ package com.tradesys.engine.stockmarket.engine.api;
 import com.tradesys.engine.stockmarket.engine.processor.*;
 import com.tradesys.engine.stockmarket.engine.dto.ActiveProcessStatusDTO;
 import com.tradesys.engine.stockmarket.engine.dto.StreamingApiParamsDTO;
+import com.tradesys.engine.stockmarket.financial.dpimpls.alphavantage.AlphaVantageServiceUtils;
 import com.tradesys.engine.stockmarket.financial.dpimpls.iextrading.IEXTradingServiceUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,7 @@ public class StreamingEngineApi {
 
     private final IEXTradingServiceUtils iexTradingServiceUtils;
     private final ProcessorFactory processorFactory;
+    private final AlphaVantageServiceUtils alphaVantageServiceUtils;
 
     @PostMapping("/processes")
     public ResponseEntity<?> startProcess(@RequestBody StreamingApiParamsDTO params) {
@@ -34,9 +36,24 @@ public class StreamingEngineApi {
         return new ResponseEntity<>(status, HttpStatus.OK);
     }
 
-    @PostMapping("alpha-processes/all-symbols")
+    @PostMapping("/alpha-processes/all-symbols")
     public ResponseEntity<?> startAlphantageProcesses(@RequestBody StreamingApiParamsDTO params) {
         List<String> rewrittenUrls = iexTradingServiceUtils.withAllSymbols(params.getUrls().get(0));
+        ActiveProcessStatusDTO status = processorFactory.getProcessor(ProcessorType.FINANCIAL_PROGRESSIVE_REACTIVE).startProcess(params.getProcessId(), rewrittenUrls);
+        return new ResponseEntity<>(status, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/alpha-processes/all-currencies")
+    public ResponseEntity<?> startAlphavantageProcessesForAllCurrencies(@RequestBody StreamingApiParamsDTO params) {
+        List<String> rewrittenUrls = alphaVantageServiceUtils.withAllPhysicalCurrencies(params.getUrls().get(0));
+        log.info(rewrittenUrls.toString());
+        ActiveProcessStatusDTO status = processorFactory.getProcessor(ProcessorType.FINANCIAL_PROGRESSIVE_REACTIVE).startProcess(params.getProcessId(), rewrittenUrls);
+        return new ResponseEntity<>(status, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/alpha-processes/all-dig-currencies")
+    public ResponseEntity<?> startAlpavantageProcessesForAllDigitalCurrencies(@RequestBody StreamingApiParamsDTO params) {
+        List<String> rewrittenUrls = alphaVantageServiceUtils.withAllDigiralCurrencies(params.getUrls().get(0));
         ActiveProcessStatusDTO status = processorFactory.getProcessor(ProcessorType.FINANCIAL_PROGRESSIVE_REACTIVE).startProcess(params.getProcessId(), rewrittenUrls);
         return new ResponseEntity<>(status, HttpStatus.CREATED);
     }

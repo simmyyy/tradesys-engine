@@ -12,13 +12,13 @@ import java.util.List;
 
 @Component
 @Slf4j
-public class ProgressiveFinancialReactiveEngine extends FinancialReactiveEngine {
+public class ProgressiveFinancialReactiveEngineDecorator extends FinancialReactiveEngine {
 
     private IProcessor processor;
     private int inputBatchSize = 5;
     private long delayTime = 60000;
 
-    public ProgressiveFinancialReactiveEngine(DataProvidersFactory dataProvidersFactory, DataProviderWritableFactory dataProviderWritableFactory, MetadataService metadataService, EngineFactory engineFactory) {
+    public ProgressiveFinancialReactiveEngineDecorator(DataProvidersFactory dataProvidersFactory, DataProviderWritableFactory dataProviderWritableFactory, MetadataService metadataService, EngineFactory engineFactory) {
         super(dataProvidersFactory, dataProviderWritableFactory, metadataService, engineFactory);
     }
 
